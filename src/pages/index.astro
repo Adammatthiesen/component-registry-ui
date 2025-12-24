@@ -1,16 +1,34 @@
 ---
-
+import ComponentRegistryModal from '../components/ComponentRegistryModal.astro';
+import { registryData } from '../mock/registry/data';
+import '../example-stylesheets/StorageFileBrowser.css';
 ---
 
-<html lang="en">
+<html lang="en" data-theme="dark">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>Component Registry UI</title>
+		<style>
+			:root {
+				font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			}
+			body {
+				background-color: var(--storage-browser-bg-base);
+				color: var(--storage-browser-text-normal);
+				padding: 2rem;
+				margin: 0;
+			}
+			h1 {
+				margin-bottom: 2rem;
+			}
+		</style>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<h1>Component Registry Browser</h1>
+		<p>Click the button below to browse the component registry and generate HTML strings.</p>
+		<ComponentRegistryModal registryData={registryData} />
 	</body>
 </html>
