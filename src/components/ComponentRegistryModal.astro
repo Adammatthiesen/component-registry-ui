@@ -1,5 +1,6 @@
 ---
 import type { ComponentRegistryEntry } from "../mock/registry/types";
+import { translations, type TranslationStrings } from "./translations";
 
 interface Props {
   registryData: ComponentRegistryEntry[];
@@ -10,15 +11,25 @@ interface Props {
 const { registryData, noOutput, triggerId } = Astro.props;
 
 const triggerIdExists = !!triggerId;
+
+const currentLang = "en";
+
+const t = (key: keyof TranslationStrings) =>
+  translations[currentLang][key] || translations["en"][key];
 ---
 
 <component-registry-modal
   data-registry={JSON.stringify(registryData)}
   data-no-output={noOutput ? "true" : "false"}
   data-trigger-id={triggerId}
+  data-translations={JSON.stringify(translations)}
 >
   <slot>
-    {!triggerIdExists && <button type="button">Open Component Registry</button>}
+    {
+      !triggerIdExists && (
+        <button type="button">{t("fallbackTriggerButtonText")}</button>
+      )
+    }
   </slot>
 </component-registry-modal>
 
@@ -134,7 +145,13 @@ const triggerIdExists = !!triggerId;
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      animation: fadeIn 0.2s ease;
+      opacity: 1;
+      transition: opacity 0.2s ease;
+
+      &.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
     }
 
     .modal-container {
@@ -147,12 +164,18 @@ const triggerIdExists = !!triggerId;
       max-height: 85vh;
       display: flex;
       flex-direction: column;
-      animation: slideUp 0.3s ease;
       overflow: hidden;
+      transform: translateY(0);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.hidden .modal-container {
+      transform: translateY(20px);
     }
 
     .modal-header {
-      padding: var(--component-registry-spacing-xl);
+      padding: var(--component-registry-spacing-lg)
+        var(--component-registry-spacing-xl);
       border-bottom: 1px solid var(--component-registry-border);
       display: flex;
       justify-content: space-between;
@@ -437,14 +460,43 @@ const triggerIdExists = !!triggerId;
 
 <script>
   import type { ComponentRegistryEntry } from "../mock/registry/types";
+  import type {
+    ComponentTranslations,
+    TranslationStrings,
+  } from "./translations";
 
   class ComponentRegistryModal extends HTMLElement {
     private registryData: ComponentRegistryEntry[] = [];
-    private noOutput = false;
     private selectedComponent: ComponentRegistryEntry | null = null;
     private propValues: Map<string, string> = new Map();
     private modalOpen = false;
+    private noOutput = false;
     private triggerId: string | null = null;
+    private translations: ComponentTranslations = {};
+    private currentLang = "en";
+    private localStorageLangKey = "component-registry-language";
+
+    private t(key: keyof TranslationStrings): string {
+      return (
+        this.translations[this.currentLang]?.[key] ||
+        this.translations["en"][key]
+      );
+    }
+
+    private getCurrentLocale(): string {
+      // Check local storage for value
+      const localValue = localStorage.getItem(this.localStorageLangKey);
+      if (localValue) {
+        return localValue;
+      }
+      // Check Document language
+      const docLang = document.documentElement.lang;
+      if (docLang && this.translations[docLang]) {
+        return docLang;
+      }
+      // Default to English
+      return "en";
+    }
 
     connectedCallback() {
       const dataAttr = this.getAttribute("data-registry");
@@ -454,6 +506,26 @@ const triggerIdExists = !!triggerId;
         } catch (e) {
           console.error("Failed to parse registry data:", e);
         }
+      }
+
+      const languageStorageKeyOverride = this.getAttribute(
+        "data-lang-storage-key",
+      );
+      if (languageStorageKeyOverride) {
+        this.localStorageLangKey = languageStorageKeyOverride;
+      }
+
+      // Initialize translations
+      const translationsAttr = this.getAttribute("data-translations");
+      if (translationsAttr) {
+        try {
+          this.translations = JSON.parse(translationsAttr);
+          this.currentLang = this.getCurrentLocale();
+        } catch (e) {
+          console.error("Failed to parse translations:", e);
+        }
+      } else {
+        throw new Error("No translations provided");
       }
 
       const noOutputAttr = this.getAttribute("data-no-output");
@@ -474,27 +546,99 @@ const triggerIdExists = !!triggerId;
           }
         }
       } else {
-        console.warn(
-          `No trigger ID provided. looking for button inside component instead.`,
-        );
         const trigger = this.querySelector("button");
         if (trigger) {
           trigger.addEventListener("click", () => this.openModal());
         }
+      }
+
+      // Listen for language change events
+      window.addEventListener("component-registry:language-change", ((
+        event: CustomEvent,
+      ) => {
+        this.handleLanguageChange(event.detail.lang);
+      }) as EventListener);
+    }
+
+    disconnectedCallback() {
+      // Clean up event listener
+      window.removeEventListener("component-registry:language-change", ((
+        event: CustomEvent,
+      ) => {
+        this.handleLanguageChange(event.detail.lang);
+      }) as EventListener);
+    }
+
+    handleLanguageChange(newLang: string) {
+      // Update current language
+      if (this.translations[newLang]) {
+        this.currentLang = newLang;
+
+        // Rerender modal if it's open
+        if (this.modalOpen) {
+          this.rerenderModal();
+        }
+      } else {
+        console.warn(
+          `Translation for language "${newLang}" not found. Available languages: ${Object.keys(this.translations).join(", ")}`,
+        );
+      }
+    }
+
+    rerenderModal() {
+      const overlay = this.querySelector(".modal-overlay");
+      if (!overlay) return;
+
+      // Store current state
+      const wasHidden = overlay.classList.contains("hidden");
+
+      // Remove old modal
+      overlay.remove();
+
+      // Recreate modal with new translations
+      this.renderModal();
+
+      // Restore visibility state
+      const newOverlay = this.querySelector(".modal-overlay");
+      if (newOverlay && !wasHidden) {
+        newOverlay.classList.remove("hidden");
+      }
+
+      // Restore selected component if any
+      if (this.selectedComponent) {
+        this.renderComponentList();
+        this.renderPropsSection();
+        this.renderOutputSection();
+      } else {
+        this.renderComponentList();
       }
     }
 
     openModal() {
       if (this.modalOpen) return;
       this.modalOpen = true;
-      this.renderModal();
+
+      // Create modal if it doesn't exist
+      let overlay = this.querySelector(".modal-overlay");
+      if (!overlay) {
+        this.renderModal();
+        overlay = this.querySelector(".modal-overlay");
+      }
+
+      if (overlay) {
+        // Force reflow for animation
+        overlay.classList.add("hidden");
+        requestAnimationFrame(() => {
+          overlay?.classList.remove("hidden");
+        });
+      }
     }
 
     closeModal() {
       this.modalOpen = false;
       const overlay = this.querySelector(".modal-overlay");
       if (overlay) {
-        overlay.remove();
+        overlay.classList.add("hidden");
       }
       this.selectedComponent = null;
       this.propValues.clear();
@@ -537,24 +681,38 @@ const triggerIdExists = !!triggerId;
 
     copyToClipboard() {
       const htmlString = this.generateHTMLString();
+      const copyButton = this.querySelector(
+        ".copy-button",
+      ) as HTMLButtonElement;
+      if (!copyButton) return;
+
+      const originalText = copyButton.textContent;
+
       navigator.clipboard
         .writeText(htmlString)
         .then(() => {
-          alert("Copied to clipboard!");
+          copyButton.textContent = this.t("copiedSuccess");
+          setTimeout(() => {
+            copyButton.textContent = originalText;
+          }, 2000);
         })
         .catch((err) => {
-          console.error("Failed to copy:", err);
+          console.error(this.t("copyFailed"), err);
+          copyButton.textContent = this.t("copyFailed");
+          setTimeout(() => {
+            copyButton.textContent = originalText;
+          }, 2000);
         });
     }
 
     renderModal() {
       const overlay = document.createElement("div");
-      overlay.className = "modal-overlay";
+      overlay.className = "modal-overlay hidden";
       overlay.innerHTML = `
         <div class="modal-container">
           <div class="modal-header">
-            <h2 class="modal-title">Component Registry</h2>
-            <button class="close-button" type="button">&times;</button>
+            <h2 class="modal-title">${this.t("modalTitle")}</h2>
+            <button class="close-button" type="button" aria-label="${this.t("closeButton")}">&times;</button>
           </div>
           <div class="modal-body">
             <div class="modal-content-row">
@@ -600,8 +758,7 @@ const triggerIdExists = !!triggerId;
       listContainer.innerHTML = "";
 
       if (this.registryData.length === 0) {
-        listContainer.innerHTML =
-          '<div class="empty-state">No components found in registry</div>';
+        listContainer.innerHTML = `<div class="empty-state">${this.t("noComponentsFound")}</div>`;
         return;
       }
 
@@ -614,7 +771,7 @@ const triggerIdExists = !!triggerId;
 
         card.innerHTML = `
           <h3 class="component-name">${this.createDisplayName(component.name)}</h3>
-          <div class="component-tag-display">Tag: &lt;${component.name}&gt;</div>
+          <div class="component-tag-display">${this.t("tagLabel")}: &lt;${component.name}&gt;</div>
         `;
 
         card.addEventListener("click", () => this.selectComponent(component));
@@ -633,11 +790,10 @@ const triggerIdExists = !!triggerId;
       if (!propsWrapper || !this.selectedComponent) return;
 
       propsWrapper.style.display = "block";
-      propsWrapper.innerHTML = '<h3 class="props-title">Component Props</h3>';
+      propsWrapper.innerHTML = `<h3 class="props-title">${this.t("componentPropsTitle")}</h3>`;
 
       if (this.selectedComponent.props.length === 0) {
-        propsWrapper.innerHTML +=
-          '<div class="empty-state">No props available</div>';
+        propsWrapper.innerHTML += `<div class="empty-state">${this.t("noPropsAvailable")}</div>`;
         return;
       }
 
@@ -645,12 +801,13 @@ const triggerIdExists = !!triggerId;
         const propGroup = document.createElement("div");
         propGroup.className = "prop-group";
 
+        const optionalText = this.t("optionalLabel");
         const typeInfo = this.noOutput
           ? prop.optional
-            ? "(optional)"
+            ? `(${optionalText})`
             : ""
           : prop.optional
-            ? `${prop.type} (optional)`
+            ? `${prop.type} (${optionalText})`
             : prop.type;
         const description = prop.description ? ` - ${prop.description}` : "";
 
@@ -668,7 +825,7 @@ const triggerIdExists = !!triggerId;
             name="${prop.name}"
             data-prop-name="${prop.name}"
             value="${this.propValues.get(prop.name) || ""}"
-            placeholder="${prop.defaultValue || this.noOutput ? `${prop.type}` : `Enter ${prop.name}...`}"${this.noOutput ? "\nreadonly\ndisabled" : ""}
+            placeholder="${prop.defaultValue || this.noOutput ? `${prop.type}` : `${this.t("enterPlaceholder")} ${prop.name}...`}"${this.noOutput ? "\nreadonly\ndisabled" : ""}
           />
         `;
 
@@ -698,14 +855,14 @@ const triggerIdExists = !!triggerId;
       const htmlString = this.generateHTMLString();
 
       outputSection.innerHTML = `
-        <h3 class="output-title">Generated HTML</h3>
+        <h3 class="output-title">${this.t("generatedHtmlTitle")}</h3>
         <div class="output-code">${this.escapeHtml(htmlString)}</div>
         <div class="button-group">
           <button class="button button-success copy-button" type="button">
-            Copy to Clipboard
+            ${this.t("copyToClipboard")}
           </button>
           <button class="button button-secondary reset-button" type="button">
-            Reset Props
+            ${this.t("resetProps")}
           </button>
         </div>
       `;
@@ -727,7 +884,18 @@ const triggerIdExists = !!triggerId;
       div.textContent = text;
       return div.innerHTML;
     }
+
+    // Static method to change language from outside
+    static changeLanguage(lang: string) {
+      window.dispatchEvent(
+        new CustomEvent("component-registry:language-change", {
+          detail: { lang },
+        }),
+      );
+    }
   }
 
-  customElements.define("component-registry-modal", ComponentRegistryModal);
+  if (!customElements.get("component-registry-modal")) {
+    customElements.define("component-registry-modal", ComponentRegistryModal);
+  }
 </script>

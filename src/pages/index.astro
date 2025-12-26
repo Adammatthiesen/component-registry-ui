@@ -57,6 +57,14 @@ import "../example-stylesheets/StorageFileBrowser.css";
 				border-radius: 0.375rem;
 				cursor: pointer;
 			}
+
+			pre {
+				background-color: #1e1e1e;
+				color: #d4d4d4;
+				padding: 1rem;
+				border-radius: 0.375rem;
+				overflow-x: auto;
+			}
 		</style>
 	</head>
 	<body>
@@ -90,5 +98,9 @@ import "../example-stylesheets/StorageFileBrowser.css";
 				Open Component Registry (Custom Trigger)
 			</button>
 		</div>
+
+		<hr />
+		<p>Current testing data:</p>
+		<pre>{JSON.stringify(registryData, null, 2)}</pre>
 	</body>
 </html>
