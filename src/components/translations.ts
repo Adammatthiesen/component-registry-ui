@@ -1,5 +1,3 @@
-
-
 export interface TranslationStrings {
     // Modal
     modalTitle: string;

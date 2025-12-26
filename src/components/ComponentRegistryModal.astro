@@ -467,10 +467,37 @@ const t = (key: keyof TranslationStrings) =>
 
 <script>
   import type { ComponentRegistryEntry } from "../mock/registry/types";
-  import type {
-    ComponentTranslations,
-    TranslationStrings,
-  } from "./translations";
+
+  export interface TranslationStrings {
+    // Modal
+    modalTitle: string;
+    closeButton: string;
+
+    // Component List
+    noComponentsFound: string;
+    tagLabel: string;
+
+    // Props Section
+    componentPropsTitle: string;
+    noPropsAvailable: string;
+    optionalLabel: string;
+    noDefaultValue: string;
+    enterPlaceholder: string;
+
+    // Output Section
+    generatedHtmlTitle: string;
+    copyToClipboard: string;
+    resetProps: string;
+    copiedSuccess: string;
+    copyFailed: string;
+
+    // Fallback Trigger
+    fallbackTriggerButtonText: string;
+  }
+
+  export interface ComponentTranslations {
+    [lang: string]: TranslationStrings;
+  }
 
   class ComponentRegistryModal extends HTMLElement {
     private registryData: ComponentRegistryEntry[] = [];
