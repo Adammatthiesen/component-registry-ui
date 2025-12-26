@@ -4,17 +4,21 @@ import type { ComponentRegistryEntry } from "../mock/registry/types";
 interface Props {
   registryData: ComponentRegistryEntry[];
   noOutput?: boolean;
+  triggerId?: string;
 }
 
-const { registryData, noOutput } = Astro.props;
+const { registryData, noOutput, triggerId } = Astro.props;
+
+const triggerIdExists = !!triggerId;
 ---
 
 <component-registry-modal
   data-registry={JSON.stringify(registryData)}
   data-no-output={noOutput ? "true" : "false"}
+  data-trigger-id={triggerId}
 >
   <slot>
-    <button type="button"> Open Component Registry </button>
+    {!triggerIdExists && <button type="button">Open Component Registry</button>}
   </slot>
 </component-registry-modal>
 
@@ -440,6 +444,7 @@ const { registryData, noOutput } = Astro.props;
     private selectedComponent: ComponentRegistryEntry | null = null;
     private propValues: Map<string, string> = new Map();
     private modalOpen = false;
+    private triggerId: string | null = null;
 
     connectedCallback() {
       const dataAttr = this.getAttribute("data-registry");
@@ -454,9 +459,28 @@ const { registryData, noOutput } = Astro.props;
       const noOutputAttr = this.getAttribute("data-no-output");
       this.noOutput = noOutputAttr === "true";
 
-      const trigger = this.querySelector("button");
-      if (trigger) {
-        trigger.addEventListener("click", () => this.openModal());
+      this.triggerId = this.getAttribute("data-trigger-id");
+      if (this.triggerId) {
+        const triggerElement = document.getElementById(this.triggerId);
+        if (triggerElement) {
+          triggerElement.addEventListener("click", () => this.openModal());
+        } else {
+          console.warn(
+            `Trigger element with ID "${this.triggerId}" not found. looking for button inside component instead.`,
+          );
+          const trigger = this.querySelector("button");
+          if (trigger) {
+            trigger.addEventListener("click", () => this.openModal());
+          }
+        }
+      } else {
+        console.warn(
+          `No trigger ID provided. looking for button inside component instead.`,
+        );
+        const trigger = this.querySelector("button");
+        if (trigger) {
+          trigger.addEventListener("click", () => this.openModal());
+        }
       }
     }
 
