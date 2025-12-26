@@ -1,7 +1,7 @@
 ---
-import ComponentRegistryModal from '../components/ComponentRegistryModal.astro';
-import { registryData } from '../mock/registry/data';
-import '../example-stylesheets/StorageFileBrowser.css';
+import ComponentRegistryModal from "../components/ComponentRegistryModal.astro";
+import { registryData } from "../mock/registry/data";
+import "../example-stylesheets/StorageFileBrowser.css";
 ---
 
 <html lang="en" data-theme="dark">
@@ -13,7 +13,13 @@ import '../example-stylesheets/StorageFileBrowser.css';
 		<title>Component Registry UI</title>
 		<style>
 			:root {
-				font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+				font-family:
+					system-ui,
+					-apple-system,
+					BlinkMacSystemFont,
+					"Segoe UI",
+					Roboto,
+					sans-serif;
 			}
 			body {
 				background-color: var(--storage-browser-bg-base);
@@ -28,7 +34,16 @@ import '../example-stylesheets/StorageFileBrowser.css';
 	</head>
 	<body>
 		<h1>Component Registry Browser</h1>
-		<p>Click the button below to browse the component registry and generate HTML strings.</p>
-		<ComponentRegistryModal registryData={registryData} />
+		<p>
+			Click the button below to browse the component registry and generate
+			HTML strings.
+		</p>
+		<ComponentRegistryModal registryData={registryData}>
+			Open Component Registry (Basic)
+		</ComponentRegistryModal>
+		<br /><br />
+		<ComponentRegistryModal registryData={registryData} noOutput>
+			Open Component Registry (No Output)
+		</ComponentRegistryModal>
 	</body>
 </html>

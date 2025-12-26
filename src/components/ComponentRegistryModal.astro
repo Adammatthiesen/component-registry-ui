@@ -1,21 +1,24 @@
 ---
-import type { ComponentRegistryEntry } from '../mock/registry/types';
+import type { ComponentRegistryEntry } from "../mock/registry/types";
 
 interface Props {
   registryData: ComponentRegistryEntry[];
+  noOutput?: boolean;
 }
 
-const { registryData } = Astro.props;
+const { registryData, noOutput } = Astro.props;
 ---
 
-<component-registry-modal data-registry={JSON.stringify(registryData)}>
+<component-registry-modal
+  data-registry={JSON.stringify(registryData)}
+  data-no-output={noOutput ? "true" : "false"}
+>
   <button class="registry-trigger" type="button">
-    Open Component Registry
+    <slot />
   </button>
 </component-registry-modal>
 
 <style is:global>
-
   :root {
     --component-registry-bg-base: var(--background-base, hsl(0 0% 6%));
     --component-registry-bg-step-1: var(--background-step-1, hsl(0 0% 8%));
@@ -35,23 +38,35 @@ const { registryData } = Astro.props;
     --component-registry-default-active: var(--default-active, hsl(0, 0%, 14%));
 
     --component-registry-primary-base: var(--primary-base, hsl(259, 60%, 75%));
-    --component-registry-primary-hover: var(--primary-hover, hsl(259, 71%, 82%));
-    --component-registry-primary-active: var(--primary-active, hsl(259, 75%, 77%));
-    --component-registry-primary-flat: var(--primary-flat, hsl(259 83% 73% / 0.1));
-    
+    --component-registry-primary-hover: var(
+      --primary-hover,
+      hsl(259, 71%, 82%)
+    );
+    --component-registry-primary-active: var(
+      --primary-active,
+      hsl(259, 75%, 77%)
+    );
+    --component-registry-primary-flat: var(
+      --primary-flat,
+      hsl(259 83% 73% / 0.1)
+    );
+
     --component-registry-success-base: var(--success-base, hsl(142, 69%, 46%));
-    --component-registry-success-hover: var(--success-hover, hsl(142, 67%, 59%));
-    
+    --component-registry-success-hover: var(
+      --success-hover,
+      hsl(142, 67%, 59%)
+    );
+
     --component-registry-overlay: hsl(0 0% 0% / 0.6);
-	--component-registry-white: hsl(0 0% 100%);
-    
+    --component-registry-white: hsl(0 0% 100%);
+
     --component-registry-spacing-xs: 0.25rem;
     --component-registry-spacing-sm: 0.375rem;
     --component-registry-spacing-md: 0.5rem;
     --component-registry-spacing-lg: 0.75rem;
     --component-registry-spacing-xl: 1rem;
     --component-registry-spacing-2xl: 1.25rem;
-    
+
     --component-registry-radius-sm: 4px;
     --component-registry-radius-md: 6px;
     --component-registry-radius-lg: 8px;
@@ -66,23 +81,38 @@ const { registryData } = Astro.props;
     --component-registry-text-normal: var(--text-normal, hsl(0 0% 0%));
     --component-registry-text-dimmed: var(--text-dimmed, hsl(0 0% 0% / 0.8));
     --component-registry-text-muted: var(--text-muted, hsl(0 0% 0% / 0.75));
-    --component-registry-text-inverted: var(--text-inverted, var(--component-registry-white));
+    --component-registry-text-inverted: var(
+      --text-inverted,
+      var(--component-registry-white)
+    );
 
     --component-registry-border: var(--border, hsl(263 5% 68%));
     --component-registry-shadow: var(--shadow, hsl(0 0% 65% / 0.6));
 
-	--component-registry-default-base: var(--default-base, hsl(0, 0%, 82%));
-	--component-registry-default-hover: var(--default-hover, hsl(0, 0%, 91%));
-	--component-registry-default-active: var(--default-active, hsl(0, 0%, 86%));
+    --component-registry-default-base: var(--default-base, hsl(0, 0%, 82%));
+    --component-registry-default-hover: var(--default-hover, hsl(0, 0%, 91%));
+    --component-registry-default-active: var(--default-active, hsl(0, 0%, 86%));
 
-	--component-registry-primary-base: var(--primary-base, hsl(259, 74%, 25%));
-	--component-registry-primary-hover: var(--primary-hover, hsl(259, 76%, 35%));
-	--component-registry-primary-active: var(--primary-active, hsl(259, 76%, 32%));
-    --component-registry-primary-flat: var(--primary-flat, hsl(259 83% 73% / 0.1));
-    
-	--component-registry-success-base: var(--success-base, hsl(142, 60%, 44%));
-	--component-registry-success-hover: var(--success-hover, hsl(142, 60%, 55%));
-    
+    --component-registry-primary-base: var(--primary-base, hsl(259, 74%, 25%));
+    --component-registry-primary-hover: var(
+      --primary-hover,
+      hsl(259, 76%, 35%)
+    );
+    --component-registry-primary-active: var(
+      --primary-active,
+      hsl(259, 76%, 32%)
+    );
+    --component-registry-primary-flat: var(
+      --primary-flat,
+      hsl(259 83% 73% / 0.1)
+    );
+
+    --component-registry-success-base: var(--success-base, hsl(142, 60%, 44%));
+    --component-registry-success-hover: var(
+      --success-hover,
+      hsl(142, 60%, 55%)
+    );
+
     --component-registry-overlay: hsl(0 0% 0% / 0.4);
   }
 
@@ -90,7 +120,8 @@ const { registryData } = Astro.props;
     display: inline-block;
 
     .registry-trigger {
-      padding: var(--component-registry-spacing-md) var(--component-registry-spacing-xl);
+      padding: var(--component-registry-spacing-md)
+        var(--component-registry-spacing-xl);
       background-color: var(--component-registry-primary-base);
       color: var(--component-registry-text-inverted);
       border: 1px solid var(--component-registry-border);
@@ -171,7 +202,7 @@ const { registryData } = Astro.props;
       padding: var(--component-registry-spacing-xl);
       flex: 1;
       min-height: 0;
-      position: ;
+      position:;
       display: flex;
       flex-direction: column;
       gap: var(--component-registry-spacing-xl);
@@ -276,7 +307,7 @@ const { registryData } = Astro.props;
     .component-safe-name {
       font-size: 0.875rem;
       color: var(--component-registry-text-muted);
-      font-family: 'Courier New', monospace;
+      font-family: "Courier New", monospace;
     }
 
     .props-title {
@@ -313,7 +344,7 @@ const { registryData } = Astro.props;
       border-radius: var(--component-registry-radius-sm);
       color: var(--component-registry-text-normal);
       font-size: 0.875rem;
-      font-family: 'Courier New', monospace;
+      font-family: "Courier New", monospace;
 
       &:focus {
         outline: none;
@@ -340,7 +371,7 @@ const { registryData } = Astro.props;
       background-color: var(--component-registry-bg-step-3);
       border: 1px solid var(--component-registry-border);
       border-radius: var(--component-registry-radius-sm);
-      font-family: 'Courier New', monospace;
+      font-family: "Courier New", monospace;
       font-size: 0.875rem;
       color: var(--component-registry-success-base);
       white-space: pre-wrap;
@@ -356,7 +387,8 @@ const { registryData } = Astro.props;
     }
 
     .button {
-      padding: var(--component-registry-spacing-md) var(--component-registry-spacing-xl);
+      padding: var(--component-registry-spacing-md)
+        var(--component-registry-spacing-xl);
       border: 1px solid var(--component-registry-border);
       border-radius: var(--component-registry-radius-sm);
       font-size: 0.875rem;
@@ -421,27 +453,31 @@ const { registryData } = Astro.props;
 </style>
 
 <script>
-  import type { ComponentRegistryEntry } from '../mock/registry/types';
+  import type { ComponentRegistryEntry } from "../mock/registry/types";
 
   class ComponentRegistryModal extends HTMLElement {
     private registryData: ComponentRegistryEntry[] = [];
+    private noOutput = false;
     private selectedComponent: ComponentRegistryEntry | null = null;
     private propValues: Map<string, string> = new Map();
     private modalOpen = false;
 
     connectedCallback() {
-      const dataAttr = this.getAttribute('data-registry');
+      const dataAttr = this.getAttribute("data-registry");
       if (dataAttr) {
         try {
           this.registryData = JSON.parse(dataAttr);
         } catch (e) {
-          console.error('Failed to parse registry data:', e);
+          console.error("Failed to parse registry data:", e);
         }
       }
 
-      const trigger = this.querySelector('.registry-trigger');
+      const noOutputAttr = this.getAttribute("data-no-output");
+      this.noOutput = noOutputAttr === "true";
+
+      const trigger = this.querySelector(".registry-trigger");
       if (trigger) {
-        trigger.addEventListener('click', () => this.openModal());
+        trigger.addEventListener("click", () => this.openModal());
       }
     }
 
@@ -453,7 +489,7 @@ const { registryData } = Astro.props;
 
     closeModal() {
       this.modalOpen = false;
-      const overlay = this.querySelector('.modal-overlay');
+      const overlay = this.querySelector(".modal-overlay");
       if (overlay) {
         overlay.remove();
       }
@@ -464,26 +500,26 @@ const { registryData } = Astro.props;
     selectComponent(component: ComponentRegistryEntry) {
       this.selectedComponent = component;
       this.propValues.clear();
-      
+
       // Initialize prop values with defaults
-      component.props.forEach(prop => {
+      component.props.forEach((prop) => {
         if (prop.defaultValue) {
           this.propValues.set(prop.name, prop.defaultValue);
         } else {
-          this.propValues.set(prop.name, '');
+          this.propValues.set(prop.name, "");
         }
       });
-      
+
       this.updateModalContent();
     }
 
     generateHTMLString(): string {
-      if (!this.selectedComponent) return '';
+      if (!this.selectedComponent) return "";
 
       const tagName = this.selectedComponent.name;
       const attributes: string[] = [];
 
-      this.selectedComponent.props.forEach(prop => {
+      this.selectedComponent.props.forEach((prop) => {
         const value = this.propValues.get(prop.name);
         if (value) {
           attributes.push(`${prop.name}="${value}"`);
@@ -491,23 +527,26 @@ const { registryData } = Astro.props;
       });
 
       if (attributes.length > 0) {
-        return `<${tagName} ${attributes.join(' ')}></${tagName}>`;
+        return `<${tagName} ${attributes.join(" ")}></${tagName}>`;
       }
       return `<${tagName}></${tagName}>`;
     }
 
     copyToClipboard() {
       const htmlString = this.generateHTMLString();
-      navigator.clipboard.writeText(htmlString).then(() => {
-        alert('Copied to clipboard!');
-      }).catch(err => {
-        console.error('Failed to copy:', err);
-      });
+      navigator.clipboard
+        .writeText(htmlString)
+        .then(() => {
+          alert("Copied to clipboard!");
+        })
+        .catch((err) => {
+          console.error("Failed to copy:", err);
+        });
     }
 
     renderModal() {
-      const overlay = document.createElement('div');
-      overlay.className = 'modal-overlay';
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
       overlay.innerHTML = `
         <div class="modal-container">
           <div class="modal-header">
@@ -529,8 +568,10 @@ const { registryData } = Astro.props;
         </div>
       `;
 
-      overlay.querySelector('.close-button')?.addEventListener('click', () => this.closeModal());
-      overlay.addEventListener('click', (e) => {
+      overlay
+        .querySelector(".close-button")
+        ?.addEventListener("click", () => this.closeModal());
+      overlay.addEventListener("click", (e) => {
         if (e.target === overlay) {
           this.closeModal();
         }
@@ -544,27 +585,28 @@ const { registryData } = Astro.props;
     // e.g. <cms-img> => CMS Image
     createDisplayName(tagName: string): string {
       const formattedName = tagName
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, char => char.toUpperCase());
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase());
       return formattedName;
     }
 
     renderComponentList() {
-      const listContainer = this.querySelector('.component-list');
+      const listContainer = this.querySelector(".component-list");
       if (!listContainer) return;
 
-      listContainer.innerHTML = '';
+      listContainer.innerHTML = "";
 
       if (this.registryData.length === 0) {
-        listContainer.innerHTML = '<div class="empty-state">No components found in registry</div>';
+        listContainer.innerHTML =
+          '<div class="empty-state">No components found in registry</div>';
         return;
       }
 
-      this.registryData.forEach(component => {
-        const card = document.createElement('div');
-        card.className = 'component-card';
+      this.registryData.forEach((component) => {
+        const card = document.createElement("div");
+        card.className = "component-card";
         if (this.selectedComponent?.name === component.name) {
-          card.classList.add('selected');
+          card.classList.add("selected");
         }
 
         card.innerHTML = `
@@ -572,7 +614,7 @@ const { registryData } = Astro.props;
           <div class="component-tag-display">Tag: &lt;${component.name}&gt;</div>
         `;
 
-        card.addEventListener('click', () => this.selectComponent(component));
+        card.addEventListener("click", () => this.selectComponent(component));
         listContainer.appendChild(card);
       });
     }
@@ -584,26 +626,33 @@ const { registryData } = Astro.props;
     }
 
     renderPropsSection() {
-      const propsWrapper = this.querySelector('.props-wrapper') as HTMLElement;
+      const propsWrapper = this.querySelector(".props-wrapper") as HTMLElement;
       if (!propsWrapper || !this.selectedComponent) return;
 
-      propsWrapper.style.display = 'block';
+      propsWrapper.style.display = "block";
       propsWrapper.innerHTML = '<h3 class="props-title">Component Props</h3>';
 
       if (this.selectedComponent.props.length === 0) {
-        propsWrapper.innerHTML += '<div class="empty-state">No props available</div>';
+        propsWrapper.innerHTML +=
+          '<div class="empty-state">No props available</div>';
         return;
       }
 
-      this.selectedComponent.props.forEach(prop => {
-        const propGroup = document.createElement('div');
-        propGroup.className = 'prop-group';
+      this.selectedComponent.props.forEach((prop) => {
+        const propGroup = document.createElement("div");
+        propGroup.className = "prop-group";
 
-        const typeInfo = prop.optional ? `${prop.type} (optional)` : prop.type;
-        const description = prop.description ? ` - ${prop.description}` : '';
+        const typeInfo = this.noOutput
+          ? prop.optional
+            ? "(optional)"
+            : ""
+          : prop.optional
+            ? `${prop.type} (optional)`
+            : prop.type;
+        const description = prop.description ? ` - ${prop.description}` : "";
 
         const propId = `prop-${prop.name}-${Date.now()}`;
-        
+
         propGroup.innerHTML = `
           <label class="prop-label" for="${propId}">
             ${prop.name}
@@ -615,13 +664,13 @@ const { registryData } = Astro.props;
             id="${propId}"
             name="${prop.name}"
             data-prop-name="${prop.name}"
-            value="${this.propValues.get(prop.name) || ''}"
-            placeholder="${prop.defaultValue || `Enter ${prop.name}...`}"
+            value="${this.propValues.get(prop.name) || ""}"
+            placeholder="${prop.defaultValue || this.noOutput ? `${prop.type}` : `Enter ${prop.name}...`}"${this.noOutput ? "\nreadonly\ndisabled" : ""}
           />
         `;
 
-        const input = propGroup.querySelector('input');
-        input?.addEventListener('input', (e) => {
+        const input = propGroup.querySelector("input");
+        input?.addEventListener("input", (e) => {
           const target = e.target as HTMLInputElement;
           this.propValues.set(prop.name, target.value);
           this.renderOutputSection();
@@ -632,10 +681,17 @@ const { registryData } = Astro.props;
     }
 
     renderOutputSection() {
-      const outputSection = this.querySelector('.output-section') as HTMLElement;
+      const outputSection = this.querySelector(
+        ".output-section",
+      ) as HTMLElement;
       if (!outputSection || !this.selectedComponent) return;
 
-      outputSection.style.display = 'block';
+      if (this.noOutput) {
+        outputSection.style.display = "none";
+        return;
+      }
+
+      outputSection.style.display = "block";
       const htmlString = this.generateHTMLString();
 
       outputSection.innerHTML = `
@@ -651,20 +707,24 @@ const { registryData } = Astro.props;
         </div>
       `;
 
-      outputSection.querySelector('.copy-button')?.addEventListener('click', () => this.copyToClipboard());
-      outputSection.querySelector('.reset-button')?.addEventListener('click', () => {
-        if (this.selectedComponent) {
-          this.selectComponent(this.selectedComponent);
-        }
-      });
+      outputSection
+        .querySelector(".copy-button")
+        ?.addEventListener("click", () => this.copyToClipboard());
+      outputSection
+        .querySelector(".reset-button")
+        ?.addEventListener("click", () => {
+          if (this.selectedComponent) {
+            this.selectComponent(this.selectedComponent);
+          }
+        });
     }
 
     escapeHtml(text: string): string {
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.textContent = text;
       return div.innerHTML;
     }
   }
 
-  customElements.define('component-registry-modal', ComponentRegistryModal);
+  customElements.define("component-registry-modal", ComponentRegistryModal);
 </script>
