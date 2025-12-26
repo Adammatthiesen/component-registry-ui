@@ -13,6 +13,7 @@ export interface TranslationStrings {
     componentPropsTitle: string;
     noPropsAvailable: string;
     optionalLabel: string;
+    noDefaultValue: string;
     enterPlaceholder: string;
 
     // Output Section
@@ -39,6 +40,7 @@ export const translations: ComponentTranslations = {
         componentPropsTitle: "Component Props",
         noPropsAvailable: "No props available",
         optionalLabel: "optional",
+        noDefaultValue: "No default value",
         enterPlaceholder: "Enter",
         generatedHtmlTitle: "Generated HTML",
         copyToClipboard: "Copy to Clipboard",
@@ -55,6 +57,7 @@ export const translations: ComponentTranslations = {
         componentPropsTitle: "Propriétés du composant",
         noPropsAvailable: "Aucune propriété disponible",
         optionalLabel: "optionnel",
+        noDefaultValue: "Pas de valeur par défaut",
         enterPlaceholder: "Entrer",
         generatedHtmlTitle: "HTML généré",
         copyToClipboard: "Copier dans le presse-papiers",

@@ -811,16 +811,18 @@ const t = (key: keyof TranslationStrings) =>
         propGroup.className = "prop-group";
 
         const optionalText = this.t("optionalLabel");
-        const typeInfo = this.noOutput
-          ? prop.optional
-            ? `(${optionalText})`
-            : ""
-          : prop.optional
-            ? `${prop.type} (${optionalText})`
-            : prop.type;
+        const typeInfo = prop.optional
+          ? `${prop.type} (${optionalText})`
+          : prop.type;
         const description = prop.description ? ` - ${prop.description}` : "";
 
         const propId = `prop-${prop.name}-${Date.now()}`;
+
+        const inputPlaceholder = this.noOutput
+          ? prop.defaultValue
+            ? prop.defaultValue
+            : this.t("noDefaultValue")
+          : `${this.t("enterPlaceholder")} ${prop.name}...`;
 
         propGroup.innerHTML = `
           <label class="prop-label" for="${propId}">
@@ -833,8 +835,9 @@ const t = (key: keyof TranslationStrings) =>
             id="${propId}"
             name="${prop.name}"
             data-prop-name="${prop.name}"
-            value="${this.propValues.get(prop.name) || ""}"
-            placeholder="${prop.defaultValue || this.noOutput ? `${prop.type}` : `${this.t("enterPlaceholder")} ${prop.name}...`}"${this.noOutput ? "\nreadonly\ndisabled" : ""}
+            value="${this.noOutput ? "" : this.propValues.get(prop.name)}"
+            placeholder="${inputPlaceholder}"
+            ${this.noOutput ? "readonly disabled" : ""}
           />
         `;
 
