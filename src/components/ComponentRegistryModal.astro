@@ -13,9 +13,9 @@ const { registryData, noOutput } = Astro.props;
   data-registry={JSON.stringify(registryData)}
   data-no-output={noOutput ? "true" : "false"}
 >
-  <button class="registry-trigger" type="button">
-    <slot />
-  </button>
+  <slot>
+    <button type="button"> Open Component Registry </button>
+  </slot>
 </component-registry-modal>
 
 <style is:global>
@@ -118,27 +118,6 @@ const { registryData, noOutput } = Astro.props;
 
   component-registry-modal {
     display: inline-block;
-
-    .registry-trigger {
-      padding: var(--component-registry-spacing-md)
-        var(--component-registry-spacing-xl);
-      background-color: var(--component-registry-primary-base);
-      color: var(--component-registry-text-inverted);
-      border: 1px solid var(--component-registry-border);
-      border-radius: var(--component-registry-radius-md);
-      font-size: 0.9375rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background-color: var(--component-registry-primary-hover);
-      }
-
-      &:active {
-        background-color: var(--component-registry-primary-active);
-      }
-    }
 
     .modal-overlay {
       position: fixed;
@@ -475,7 +454,7 @@ const { registryData, noOutput } = Astro.props;
       const noOutputAttr = this.getAttribute("data-no-output");
       this.noOutput = noOutputAttr === "true";
 
-      const trigger = this.querySelector(".registry-trigger");
+      const trigger = this.querySelector("button");
       if (trigger) {
         trigger.addEventListener("click", () => this.openModal());
       }
