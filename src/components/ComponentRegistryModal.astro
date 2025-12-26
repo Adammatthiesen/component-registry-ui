@@ -6,16 +6,22 @@ interface Props {
   registryData: ComponentRegistryEntry[];
   noOutput?: boolean;
   triggerId?: string;
+  langStorageKey?: string;
+  lang?: string;
 }
 
-const { registryData, noOutput, triggerId } = Astro.props;
+const {
+  registryData,
+  noOutput,
+  triggerId,
+  langStorageKey,
+  lang = "en",
+} = Astro.props;
 
 const triggerIdExists = !!triggerId;
 
-const currentLang = "en";
-
 const t = (key: keyof TranslationStrings) =>
-  translations[currentLang][key] || translations["en"][key];
+  translations[lang][key] || translations["en"][key];
 ---
 
 <component-registry-modal
@@ -23,6 +29,7 @@ const t = (key: keyof TranslationStrings) =>
   data-no-output={noOutput ? "true" : "false"}
   data-trigger-id={triggerId}
   data-translations={JSON.stringify(translations)}
+  data-lang-storage-key={langStorageKey}
 >
   <slot>
     {
@@ -474,7 +481,7 @@ const t = (key: keyof TranslationStrings) =>
     private triggerId: string | null = null;
     private translations: ComponentTranslations = {};
     private currentLang = "en";
-    private localStorageLangKey = "component-registry-language";
+    private localStorageLangKey: string | null = null;
 
     private t(key: keyof TranslationStrings): string {
       return (
@@ -484,10 +491,12 @@ const t = (key: keyof TranslationStrings) =>
     }
 
     private getCurrentLocale(): string {
-      // Check local storage for value
-      const localValue = localStorage.getItem(this.localStorageLangKey);
-      if (localValue) {
-        return localValue;
+      if (this.localStorageLangKey) {
+        // Check local storage for value
+        const localValue = localStorage.getItem(this.localStorageLangKey);
+        if (localValue) {
+          return localValue;
+        }
       }
       // Check Document language
       const docLang = document.documentElement.lang;
